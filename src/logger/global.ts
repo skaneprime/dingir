@@ -17,6 +17,10 @@ export function PrintError(error: Error) {
   const [main, ...rest] = stack.items;
   const punc = chalk.gray(':');
 
+  if (!stack.items.length) {
+    return System.Fatal(error);
+  }
+
   if (main.fileName === 'dingir.js') {
     System.Fatal(
       `${chalk.red('[Uncaught Exception]')} ${chalk.cyan(main.callee)} throwed ${chalk.red(error.name)}: ${

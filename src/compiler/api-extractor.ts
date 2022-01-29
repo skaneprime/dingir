@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import chalk from 'chalk';
 import { build } from 'tsc-prog';
 import { randomBytes } from 'crypto';
 import { Extractor, ExtractorConfig, ExtractorLogLevel } from '@microsoft/api-extractor';
@@ -9,7 +10,8 @@ export function ExtractApi(entry: string, outpath?: string) {
   const tempDir = randomBytes(10).toString('hex');
   /** Disable console for uncontrolable shitty logs */
   // if (true /** add some debug value for verbose logs */)
-  console = new console.Console(new fs.WriteStream(Buffer.from([])));
+  // Risky Cause Other Code's console log may not appear. But if they use their own or system logger then it's not the case
+  console = new console.Console(new fs.WriteStream(Buffer.from([]))); 
 
   build({
     basePath: process.cwd(),
@@ -19,6 +21,7 @@ export function ExtractApi(entry: string, outpath?: string) {
       declarationDir: `${path.dirname(entry)}/.tsc-types-${tempDir}`,
       emitDeclarationOnly: true,
     },
+    files: [`${process.cwd()}/dingir.d.ts`],
     include: [`${path.dirname(entry)}/**/*`],
   });
 
@@ -62,7 +65,7 @@ export function ExtractApi(entry: string, outpath?: string) {
         },
         tsdocMessageReporting: {
           default: {
-            logLevel: ExtractorLogLevel.Warning,
+            logLevel: ExtractorLogLevel.Warning
           },
         },
       },
@@ -72,11 +75,23 @@ export function ExtractApi(entry: string, outpath?: string) {
   });
 
   Extractor.invoke(extractorConfig, {
-    messageCallback() {
-      // console.log(msg)
+    messageCallback(msg) {
+      const level = `${msg.logLevel[0].toUpperCase()}${msg.logLevel.slice(1)}:`;
+      switch (msg.logLevel) {
+        case ExtractorLogLevel.Warning:
+          return System.Warn(`(${chalk.yellowBright(msg.messageId)})`, msg.text);
+        case ExtractorLogLevel.Info:
+          return System.Info(`(${chalk.cyanBright(msg.messageId)})`, msg.text);
+        case ExtractorLogLevel.Error:
+          return System.Error(`(${chalk.redBright(msg.messageId)})`, msg.text);
+        case ExtractorLogLevel.Verbose:
+          return System.Debug(`(${msg.messageId})`, msg.text);
+        default:
+          return System.Debug(level, `(${msg.messageId})`, msg.text);
+      }
     },
     showDiagnostics: false,
-    showVerboseMessages: false,
+    showVerboseMessages: false
   });
 
   System.Debug('Api Extracted');

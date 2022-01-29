@@ -58,7 +58,7 @@ export async function CompileToDGL(entry: string, options: CompileOptions) {
     ExtractApi(
       path.resolve(entry),
       options.out
-        ? path.resolve(`${options.out?.slice(0, options.out.length - 3)}${options.ver ? `@${options.ver}` : ''}.d.ts`)
+        ? path.resolve(`${options.out.slice(0, options.out.length - 3)}${options.ver ? `@${options.ver}` : ''}.d.ts`)
         : undefined,
     );
   }
