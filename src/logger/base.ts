@@ -75,7 +75,7 @@ export class Logger {
   private get ActiveTheme() {
     const theme = this.Themes.activeTheme || this.Themes.defaultTheme;
 
-    return Utils.Object.mergeProp(theme, this.Themes.overwritable) as Theme;
+    return Utils.Objects.mergeProp(theme, this.Themes.overwritable) as Theme;
   }
 
   private SetWriteColors(time: string, label: string, level: string, type: Levels) {
