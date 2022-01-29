@@ -5,14 +5,14 @@ import * as Class from './class';
 export type ReturnOrInstance<T extends Function.Any | Class.Any> = T extends Function.Any
   ? ReturnType<T>
   : T extends Class.Any
-    ? InstanceType<T>
-    : unknown;
+  ? InstanceType<T>
+  : unknown;
 /** @public */
 export type ParamsOrClassParams<T> = T extends Function.Any
   ? Parameters<T>
   : T extends Class.Any
-    ? ConstructorParameters<T>
-    : unknown;
+  ? ConstructorParameters<T>
+  : unknown;
 /** @public */
 export type IsFunction<T> = T extends Function.Any ? true : false;
 /** @public */
