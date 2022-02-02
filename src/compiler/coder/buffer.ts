@@ -1,6 +1,6 @@
-import { GET_SECRET_KEY } from './key';
+import { GET_SECRET_KEY } from "./key";
 
-export function Decode(buffer: Buffer, key = GET_SECRET_KEY()) {
+export function decode(buffer: Buffer, key = GET_SECRET_KEY()) {
   let keyI = 0;
   return Buffer.from(
     buffer.map((val) => {
@@ -11,7 +11,7 @@ export function Decode(buffer: Buffer, key = GET_SECRET_KEY()) {
   );
 }
 
-export function Encode(buffer: Buffer, key = GET_SECRET_KEY()) {
+export function encode(buffer: Buffer, key = GET_SECRET_KEY()) {
   let keyI = 0;
   return Buffer.from(
     buffer.map((val) => {
@@ -22,4 +22,4 @@ export function Encode(buffer: Buffer, key = GET_SECRET_KEY()) {
   );
 }
 
-export default { Encode, Decode };
+export default { encode, decode };

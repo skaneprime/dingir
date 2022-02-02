@@ -1,5 +1,5 @@
-import * as Function from './function';
-import * as Class from './class';
+import * as Function from "./function";
+import * as Class from "./class";
 
 /** @public */
 export type ReturnOrInstance<T extends Function.Any | Class.Any> = T extends Function.Any

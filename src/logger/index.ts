@@ -1,11 +1,11 @@
-import { Logger, Theme } from './base';
+import { Logger, Theme } from "./base";
 
 export { Theme };
-export type { Logger };
+export { Logger as LoggerClass };
 /** @public */
-export function Create(settings?: ConstructorParameters<typeof Logger>[0]) {
+export function create(settings?: ConstructorParameters<typeof Logger>[0]) {
   return new Logger({
     ...settings,
-    label: settings?.label?.substring(0, 6).toUpperCase() || ' '.repeat(6),
+    label: settings?.label?.substring(0, 6).toUpperCase() || " ".repeat(6),
   });
 }

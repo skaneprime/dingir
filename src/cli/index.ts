@@ -1,6 +1,6 @@
-import { program } from './commander';
+import { program } from "./commander";
 
-import './run';
-import './build';
+import "./run";
+import "./build";
 
 program.parse(process.argv);

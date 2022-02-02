@@ -27,7 +27,7 @@ interface NCCOption<WatchState extends boolean> {
    * source-map-support in the output file (increases output by 32kB).
    * @default "../"
    */
-  sourceMapBasePrefix: '../';
+  sourceMapBasePrefix: "../";
 
   /** @default true */
   sourceMapRegister: boolean;
@@ -36,7 +36,7 @@ interface NCCOption<WatchState extends boolean> {
   watch: WatchState;
 
   /** @default does not generate a license file */
-  license: '';
+  license: "";
 
   /** @default false */
   v8cache: boolean;
@@ -50,7 +50,7 @@ interface NCCOption<WatchState extends boolean> {
 
 /** @public */
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-export default require('@vercel/ncc') as <T extends boolean = false>(
+export default require("@vercel/ncc") as <T extends boolean = false>(
   entry: string,
   options?: Partial<NCCOption<T>>,
 ) => T extends true

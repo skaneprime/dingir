@@ -1,11 +1,11 @@
-import { camelCase } from 'lodash';
-import * as String from './string';
+import { camelCase } from "lodash";
+import * as String from "./string";
 
 /** @public */
 export function mergeProp<T, S>(target: T, prop: S): T & S {
   //target is destination, prop is source
   for (const key in prop) {
-    if (typeof prop[key] === 'object') {
+    if (typeof prop[key] === "object") {
       if (!target[key as unknown as keyof T]) {
         target[key as unknown as keyof T] = {} as T[keyof T];
       }

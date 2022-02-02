@@ -1,12 +1,12 @@
-import './modules';
+import "./modules";
 
-import * as Dingir from './dingir';
-export { Dingir }; // For API Gen
+import * as _Dingir from "./dingir";
+export { _Dingir as Dingir }; // For API Gen
 
 declare global {
   // eslint-disable-next-line no-var
-  var Dingir: unknown;
+  var Dingir: typeof _Dingir;
 }
-global.Dingir = Dingir;
+global.Dingir = _Dingir;
 
-import './cli';
+import "./cli";

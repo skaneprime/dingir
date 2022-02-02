@@ -1,2 +1,2 @@
-export { CompileToDGL, CompileOptions } from './compile';
-export { ImportDGL } from './import';
+export { compileToDG, CompileOptions } from "./compile";
+export { importDG } from "./import";

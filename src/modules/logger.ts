@@ -1,4 +1,4 @@
-import { GlobalizeSystemLogger, HandleErrorsBeatifully } from '../logger/global';
+import { globalizeSystemLogger, handleErrorsBeatifully } from "../logger/global";
 
-GlobalizeSystemLogger();
-HandleErrorsBeatifully();
+globalizeSystemLogger();
+handleErrorsBeatifully();

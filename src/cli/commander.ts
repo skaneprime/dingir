@@ -1,4 +1,4 @@
-import { env } from '../dingir';
-import { Command } from 'commander';
+import { env } from "../dingir";
+import { Command } from "commander";
 
-export const program = new Command('dingir').version(env.version);
+export const program = new Command("dingir").version(env.version);
