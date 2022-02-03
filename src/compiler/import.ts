@@ -1,49 +1,47 @@
 import fs from "fs";
 import path from "path";
 import bytenode from "bytenode";
-import bufCoder from "./coder/buffer";
-import { unpackDG } from "./packer";
+import coder from "./coder";
+import packer from "./packer";
 import { env } from "../dingir";
+import { systemLogger } from "../services/logger/system";
 
 /** @public */
-export function importDG(entry: string) {
-  if (!entry.endsWith(".dg")) return System.error(`"${entry}" can't import non .dg file`);
+export function dgImport(entry: string) {
+	if (!entry.endsWith(".dg")) {
+		return systemLogger.error(`"${entry}" can't import non .dg file`);
+	}
+	const unpacked = packer.unpack(fs.readFileSync(path.resolve(entry)));
 
-  const unpackedDG = unpackDG(fs.readFileSync(path.resolve(entry)));
+	if (unpacked.meta.dgv !== env.version) {
+		systemLogger.warn(
+			`"${entry}" is built with DGV-${unpacked.meta.dgv} but current is DGV-${env.version}. It may cause bugs or some issues. Please use valid version or update the module`,
+		);
+	} else {
+		systemLogger.debug(`"${entry}" DGV is compatible`);
+	}
+	let requireFailed = false;
+	for (let i = 0; i < unpacked.meta.externals.length; i++) {
+		try {
+			require(unpacked.meta.externals[i]);
+		} catch (error) {
+			systemLogger.fatal(error);
+			requireFailed = true;
+		}
+	}
 
-  System.debug(unpackedDG.meta);
+	if (requireFailed) {
+		return systemLogger.fatal("Failed to require externals");
+	}
 
-  const failedExternalImports = unpackedDG.meta.externals
-    .map((external) => {
-      try {
-        require(external);
-      } catch (error) {
-        return [external, error] as [string, Error];
-      }
-    })
-    .filter((s) => s) as [string, Error][]; // removing undefined
+	const mod = { exports: {} };
+	bytenode.runBytecode(coder.buffer.decode(unpacked.bytecode))(
+		mod.exports,
+		require,
+		mod,
+		entry,
+		path.dirname(entry),
+	);
 
-  if (unpackedDG.meta.dgv !== env.version) {
-    System.warn(
-      `"${entry}" is built with DGV-${unpackedDG.meta.dgv} but current is DGV-${env.version}. It may cause bugs or some issues. Please use valid version or update the module`,
-    );
-  } else {
-    System.debug(`"${entry}" DGV is compatible`);
-  }
-
-  if (failedExternalImports.length > 0) {
-    const fails = failedExternalImports
-      .map(([external, error]) => {
-        return `${external} -> ${error.name}: ${error.message}`;
-      })
-      .join("\n");
-    return System.error(`Failed to import "${entry}"\nFailed to import externals:\n${fails}`);
-  }
-
-  const exports = {},
-    mod = { exports: {} };
-
-  bytenode.runBytecode(bufCoder.decode(unpackedDG.bytecode))(exports, require, mod, entry, path.dirname(entry));
-
-  return { ...mod.exports, ...exports };
+	return mod.exports;
 }

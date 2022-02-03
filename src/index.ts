@@ -1,12 +1,13 @@
-import "./modules";
+import "./services/events/unhandleds";
+import * as dingir from "./dingir";
 
-import * as _Dingir from "./dingir";
-export { _Dingir as Dingir }; // For API Gen
+Object.defineProperty(global, "Dingir", {
+	enumerable: true,
+	writable: false,
+	configurable: false,
+	value: dingir,
+});
 
-declare global {
-  // eslint-disable-next-line no-var
-  var Dingir: typeof _Dingir;
-}
-global.Dingir = _Dingir;
+export { dingir as Dingir };
 
 import "./cli";

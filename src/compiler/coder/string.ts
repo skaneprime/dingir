@@ -1,31 +1,31 @@
-import { GET_SECRET_KEY } from "./key";
+import { getSecretKey } from "./key";
 
-export function encode(str: string, key = GET_SECRET_KEY()) {
-  let keyIndex = 0,
-    string = "";
+function encode(str: string, key = getSecretKey()) {
+	let keyIndex = 0;
+	let string = "";
 
-  for (let i = 0; i < str.length; i++) {
-    string += String.fromCharCode(str[i].charCodeAt(0) + key[keyIndex]);
-    keyIndex++;
+	for (let i = 0; i < str.length; i++) {
+		string += String.fromCharCode(str[i].charCodeAt(0) + key[keyIndex]);
+		keyIndex++;
 
-    if (keyIndex === key.length) keyIndex = 0;
-  }
+		if (keyIndex === key.length) keyIndex = 0;
+	}
 
-  return string;
+	return string;
 }
 
-export function decode(str: string, key = GET_SECRET_KEY()) {
-  let keyIndex = 0,
-    string = "";
+function decode(str: string, key = getSecretKey()) {
+	let keyIndex = 0;
+	let string = "";
 
-  for (let i = 0; i < str.length; i++) {
-    string += String.fromCharCode(str[i].charCodeAt(0) - key[keyIndex]);
-    keyIndex++;
+	for (let i = 0; i < str.length; i++) {
+		string += String.fromCharCode(str[i].charCodeAt(0) - key[keyIndex]);
+		keyIndex++;
 
-    if (keyIndex === key.length) keyIndex = 0;
-  }
+		if (keyIndex === key.length) keyIndex = 0;
+	}
 
-  return string;
+	return string;
 }
 
 export default { encode, decode };

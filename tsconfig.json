@@ -1,4 +1,7 @@
 {
+  "ts-node": {
+    "files": true
+  },
   "compilerOptions": {
     /* Visit https://aka.ms/tsconfig.json to read more about this file */
 
@@ -71,5 +74,8 @@
     "forceConsistentCasingInFileNames": true,        /* Disallow inconsistently-cased references to the same file. */
     "useUnknownInCatchVariables": true
   },
+  "files": [
+    "./bin/dingir.d.ts"
+  ],
   "include": ["src"]
 }

@@ -1,5 +1,5 @@
-export interface MetaDataInterface {
-  dgv: string;
-  ver: string;
-  externals: string[];
+export interface DGMetadata {
+	dgv: string;
+	ver: string;
+	externals: string[];
 }

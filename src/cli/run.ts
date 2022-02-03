@@ -1,83 +1,70 @@
 import path from "path";
 import chalk from "chalk";
 import cluster from "cluster";
+import server from "../server";
 import { NodeVM } from "vm2";
-import { program } from "./commander";
-import { close, serve } from "../server";
-import process from "process";
+import { program } from ".";
+import { Dingir } from "..";
+import { systemLogger } from "../services/logger/system";
 
-if (cluster.isWorker) {
-  cluster.worker?.process.channel?.unref();
-  void (async function () {
-    if (!process.env.source) return;
+void (async function runCluster() {
+	if (cluster.isWorker && process.env.source) {
+		cluster.worker?.process.channel?.unref();
 
-    System.debugEnabled = !!process.env.debug;
+		const dingirVM = new NodeVM({
+			compiler(code, filename) {
+				systemLogger.debug(
+					`${chalk.cyanBright("[run]")} executing ${chalk.green(`"${filename}"`)}`,
+				);
+				return code;
+			},
+			sandbox: {
+				Dingir: Dingir,
+				__MAIN_FILE_PATH__: process.env.source,
+				__TS_NODE_PATH__: __filename.endsWith(".ts")
+					? "ts-node"
+					: `${__dirname}../../node_modules/ts-node`,
+				__DECLARATION_PATH__: __filename.endsWith(".ts")
+					? path.resolve(process.cwd(), "bin", "dingir.d.ts")
+					: path.resolve(process.cwd(), "dingir.d.ts"),
+			},
+			require: { builtin: ["*"], external: true },
+			sourceExtensions: ["js", "ts"],
+			console: "inherit",
+		});
 
-    const DingirVM = new NodeVM({
-      compiler(code, filename) {
-        System.debug(`${chalk.cyanBright("[run]")} executing ${chalk.green(`"${filename}"`)}`);
-        return code;
-      },
-      sandbox: {
-        Dingir,
-        __MAIN_FILE_PATH__: process.env.source,
-        __TS_NODE_PATH__: __filename.endsWith(".ts") ? "ts-node" : `${__dirname}../../node_modules/ts-node`,
-        __PATH_TO_DECLARATION__: path.resolve(process.cwd(), "dingir.d.ts"),
-      },
-      require: { builtin: ["*"], external: true },
-      sourceExtensions: ["js", "ts"],
-      console: "inherit",
-    });
+		dingirVM.run(
+			`require(__TS_NODE_PATH__).register({ 
+                compilerOptions: { 
+                    target: "es6",
+                    noImplicitAny: false
+                }, 
+                files: true
+            });`,
+			"ts-node",
+		);
 
-    DingirVM.run(
-      `
-				require(__TS_NODE_PATH__).register({ 
-					transpileOnly: ${__filename.endsWith(".ts")},
-					compilerOptions: { target: "es6" }, 
-					${__filename.endsWith(".ts") ? "" : `files: [__PATH_TO_DECLARATION__]`} 
-				});
-			`,
-      "ts-node",
-    );
-
-    DingirVM.run(
-      `
-				__MAIN_FILE_PATH__.endsWith(".dg") 
-				? Dingir.Compiler.ImportDG(__MAIN_FILE_PATH__) 
-				: require(__MAIN_FILE_PATH__)
-			`,
-      path.basename(process.env.source),
-    );
-  })();
-}
+		dingirVM.run(
+			`__MAIN_FILE_PATH__.endsWith(".dg") 
+                ? Dingir.Compiler.ImportDG(__MAIN_FILE_PATH__) 
+                : require(__MAIN_FILE_PATH__)`,
+			path.basename(process.env.source),
+		);
+	}
+})();
 
 program
-  .command("run <source>")
-  .description("Run a DG or TS")
-  .option("-d, --debug")
-  .action(async (source: string, options: { debug?: boolean }) => {
-    if (cluster.isPrimary) {
-      System.debugEnabled = options.debug || false;
+	.command("run <source>")
+	.description("Run a DG or TS")
+	.option("-d, --debug")
+	.action(async (source: string, options: { debug?: boolean }) => {
+		if (cluster.isPrimary) {
+			await server.serve();
+			const worker = cluster.fork({ source, debug: options.debug });
 
-      await serve();
-      const worker = cluster.fork({ source, debug: System.debug });
-
-      worker.on("exit", async (code) => {
-        System.debug(`${chalk.cyanBright("[run]")} process finished with exit code`, code);
-        await close();
-      });
-    }
-  });
-/**
-    if(filename.endsWith(".tsz")) {
-        const transpiled = ts.transpile(code, { 
-            module: ts.ModuleKind.Node12,
-            target: ts.ScriptTarget.ES5,
-            sourceMap: true,
-            inlineSourceMap: true
-        }, filename);
-        console.log(transpiled)
-        System.Debug(`${chalk.magentaBright("[tvm]")} transpiling ${chalk.green(`"${filename}"`)}`);
-        return transpiled;
-    }
-*/
+			worker.on("exit", async (code) => {
+				systemLogger.debug(`${chalk.cyanBright("[run]")} process finished with exit code`, code);
+				await server.close();
+			});
+		}
+	});

@@ -1,10 +1,19 @@
-import * as Types from "./types";
-import * as Class from "./class";
-import * as Array from "./array";
-import * as Objects from "./obj";
-import * as String from "./string";
-import * as Promise from "./promise";
-import * as Function from "./function";
-import * as FileSystem from "./file-system";
+import * as dgTypes from "./types";
+import * as dgClass from "./class";
+import * as dgArray from "./array";
+import * as dgObject from "./object";
+import * as dgString from "./string";
+import * as dgPromise from "./promise";
+import * as dgFunction from "./function";
+import * as dgFs from "./fs";
 
-export { Objects, Types, Class, Array, String, Promise, Function, FileSystem };
+export {
+	dgTypes as types,
+	dgClass as class,
+	dgArray as array,
+	dgObject as object,
+	dgString as string,
+	dgPromise as promise,
+	dgFunction as function,
+	dgFs as fs,
+};

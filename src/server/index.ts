@@ -1,29 +1,28 @@
 import chalk from "chalk";
 import express from "express";
 import { Server } from "http";
+import { systemLogger } from "../services/logger/system";
 
 const app = express();
 let httpServer: Server;
 
 export function serve() {
-  return new Promise<void>((resolve) => {
-    httpServer = app.listen(() => {
-      const address = httpServer.address();
-      const port = typeof address == "string" ? address : `${address?.port}`;
-
-      System.debug(`${chalk.cyanBright("[Server]")} Listening to port ${chalk.yellow(port)}`);
-      resolve();
-    });
-  });
+	return new Promise<void>((resolve) => {
+		httpServer = app.listen(() => {
+			const address = httpServer.address();
+			const port = typeof address === "string" ? address : address?.port;
+			systemLogger.debug(`${chalk.cyanBright("[InternalServer]")} Listening to`, port);
+			resolve();
+		});
+	});
 }
-
 export function close() {
-  return new Promise<void>((resolve) => {
-    httpServer?.close((error) => {
-      if (error) {
-        System.error(`${chalk.cyanBright("[Server]")} Failed to close server`, error);
-      } else System.debug(`${chalk.cyanBright("[Server]")} Closed`);
-      resolve();
-    });
-  });
+	return new Promise<void>((resolve) => {
+		httpServer.close(() => {
+			systemLogger.debug(`${chalk.cyanBright("[InternalServer]")} Closed`);
+			resolve();
+		});
+	});
 }
+
+export default { serve, close };

@@ -1,10 +1,10 @@
-import * as Utils from "./utils";
-import * as Logger from "./logger";
-import * as Compiler from "./compiler";
+import * as compiler from "./compiler";
+import * as utils from "./utils";
+import * as logger from "./services/logger";
 
 /** @public */
 const env = {
-  version: "0.7.5",
+	version: "0.9.0",
 };
 
-export { env, Utils, Logger, Compiler };
+export { compiler, utils, logger, env };
