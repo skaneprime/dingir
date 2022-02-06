@@ -1,6 +1,7 @@
 import { Command } from "commander";
+import { env } from "../dingir";
 
-export const program = new Command("dingir").version("1.3.1");
+export const program = new Command("dingir").version(env.version);
 
 import "./run";
 import "./build";
