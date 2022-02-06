@@ -16,7 +16,7 @@ function unpack(pack: Buffer) {
 	const metaSize = pack.slice(0, int32BE);
 	const metaBuf = pack.slice(int32BE, metaSize.readInt32BE() + int32BE);
 	const bytecode = pack.slice(int32BE + metaSize.readInt32BE(), pack.byteLength);
-	console.log(metaBuf.toString());
+
 	return {
 		meta: JSON.parse(metaBuf.toString()) as DGMetadata,
 		bytecode,

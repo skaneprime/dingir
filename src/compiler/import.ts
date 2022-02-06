@@ -43,5 +43,5 @@ export function dgImport(entry: string) {
 		path.dirname(entry),
 	);
 
-	return mod.exports;
+	return mod.exports as Record<string, unknown>;
 }

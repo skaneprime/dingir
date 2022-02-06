@@ -96,7 +96,7 @@ async function bundleJavascript(jsEntryPath: string, options?: CompilerOptions) 
 	if (!process.env["SAITAMAS_SUPER_SECRET_DEBUG"]) {
 		console = new console.Console(new tty.WriteStream(0));
 	}
-	
+
 	systemLogger.debug(jsEntryPath);
 	const output = await ncc(jsEntryPath, {
 		...(options || {}),
@@ -121,9 +121,6 @@ function compileToBytecode(code: string) {
 	const decodable = Buffer.compare(bytecode, coder.buffer.decode(encoded)) === 0;
 
 	if (!decodable) {
-		systemLogger.info(
-			encoded, bytecode, coder.buffer.decode(encoded)
-		)
 		return systemLogger.error(`DGE001: Can't compile file to dg. Undecodable code`);
 	}
 

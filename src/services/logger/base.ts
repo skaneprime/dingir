@@ -93,7 +93,7 @@ export class LoggerService {
 			: path.resolve(process.cwd(), "logs", moment().format("YYYY-MM-DD") + ".log");
 
 		utils.fs.ensureDirectoryExistence(streamFilePath);
-		this.file = fs.createWriteStream(streamFilePath, { flags: "a", mode: 0x666 });
+		this.file = fs.createWriteStream(streamFilePath, { flags: "a" });
 	}
 
 	public enableLevel(level: LogLevel) {
