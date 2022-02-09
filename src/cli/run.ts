@@ -38,8 +38,7 @@ void (async function runCluster() {
                 compilerOptions: { 
                     target: "es6",
                     noImplicitAny: false,
-                }, 
-				transpileOnly: true,
+                },
                 files: true
             });`,
 			"typesript-node",
