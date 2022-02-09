@@ -22,14 +22,14 @@ void (async function runCluster() {
 				Dingir: Dingir,
 				__MAIN_FILE_PATH__: process.env.source,
 				__TS_NODE_PATH__: __filename.endsWith(".ts")
-					? "ts-node"
+					? `${process.cwd()}/node_modules/ts-node`
 					: `${__dirname}../../node_modules/ts-node`,
 				__DECLARATION_PATH__: __filename.endsWith(".ts")
 					? path.resolve(process.cwd(), "bin", "dingir.d.ts")
 					: path.resolve(process.cwd(), "dingir.d.ts"),
 			},
 			require: { builtin: ["*"], external: true },
-			sourceExtensions: ["js", "ts"],
+			sourceExtensions: ["dg", "js", "ts"],
 			console: "inherit",
 		});
 
@@ -37,19 +37,20 @@ void (async function runCluster() {
 			`require(__TS_NODE_PATH__).register({ 
                 compilerOptions: { 
                     target: "es6",
-                    noImplicitAny: false
+                    noImplicitAny: false,
                 }, 
+				transpileOnly: true,
                 files: true
             });`,
-			"ts-node",
+			"typesript-node",
 		);
 
-		dingirVM.run(
-			`__MAIN_FILE_PATH__.endsWith(".dg") 
-                ? Dingir.Compiler.ImportDG(__MAIN_FILE_PATH__) 
-                : require(__MAIN_FILE_PATH__)`,
-			path.basename(process.env.source),
-		);
+		require.extensions[".dg"] = (module, filename) => {
+			module.exports = Dingir.compiler.import(filename);
+			return module;
+		};
+
+		dingirVM.run(`require(__MAIN_FILE_PATH__)`, path.basename(process.env.source));
 	}
 })();
 
