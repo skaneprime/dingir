@@ -3,9 +3,10 @@ import path from "path";
 import util from "util";
 import chalk from "chalk";
 import moment from "moment";
-import { utils } from "../../dingir";
+import { Utils } from "../../dingir";
 
-enum LogLevel {
+/** @public */
+export enum LogLevel {
 	"TRACE",
 	"DEBUG",
 	"INFO",
@@ -75,7 +76,7 @@ export class LoggerService {
 
 		if (this.showableLevels.has(level)) {
 			this.stdout.write(`${output}\n`);
-			this.file?.write(`${utils.string.stripAnsi(output)}\n`);
+			this.file?.write(`${Utils.String.stripAnsi(output)}\n`);
 		}
 	}
 
@@ -92,15 +93,17 @@ export class LoggerService {
 			? path.resolve(options.logFilePath)
 			: path.resolve(process.cwd(), "logs", moment().format("YYYY-MM-DD") + ".log");
 
-		utils.fs.ensureDirectoryExistence(streamFilePath);
+		Utils.fs.ensureDirectoryExistence(streamFilePath);
 		this.file = fs.createWriteStream(streamFilePath, { flags: "a" });
 	}
 
 	public enableLevel(level: LogLevel) {
 		this.showableLevels.add(level);
+		return this;
 	}
 	public disableLevel(level: LogLevel) {
 		this.showableLevels.delete(level);
+		return this;
 	}
 
 	public trace = (...args: unknown[]) => this.write(LogLevel.TRACE, args);

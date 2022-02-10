@@ -1,6 +1,6 @@
-import { LoggerService } from "./base";
+import { LoggerService, LogLevel } from "./base";
 
-export { LoggerService };
+export { LoggerService, LogLevel };
 /** @public */
 export function create(...args: ConstructorParameters<typeof LoggerService>) {
 	return new LoggerService(...args);

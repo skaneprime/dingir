@@ -8,12 +8,12 @@ import * as dgFunction from "./function";
 import * as dgFs from "./fs";
 
 export {
-	dgTypes as types,
-	dgClass as class,
-	dgArray as array,
-	dgObject as object,
-	dgString as string,
-	dgPromise as promise,
-	dgFunction as function,
+	dgTypes as Types,
+	dgClass as Class,
+	dgArray as Array,
+	dgObject as Object,
+	dgString as String,
+	dgPromise as Promise,
+	dgFunction as Function,
 	dgFs as fs,
 };
