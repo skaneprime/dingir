@@ -36,25 +36,25 @@ export function dgImport(entry: string) {
 	}
 
 	const mod = { exports: {} };
-	console.log(entry)
+	console.log(entry);
 	bytenode.runBytecode(coder.buffer.decode(unpacked.bytecode))(
 		mod.exports,
-		(str: string) => { 
+		(str: string) => {
 			/** INVESTIGATE ME. TEMPORAL FIX
 			 * // DEEP DG REQUIRE RESULT IN FAIL (2 LVL)
 			 * FILE1.DG -> FILE2.DG -> CANVAS = FAILED TO REQUIRE
 			 */
 			let mod = {};
 			try {
-				return mod = require(str);
+				return (mod = require(str));
 			} catch (error) {
-				if(error instanceof Error && error.message.includes("Cannot find module")) {
+				if (error instanceof Error && error.message.includes("Cannot find module")) {
 					const nodePath = path.relative(`${path.dirname(entry)}`, str);
 					const modName = path.basename(str).replace(path.extname(str), "");
 					const pathToModule = `${process.cwd()}/node_modules/${modName}/${nodePath}`;
 					// INVALID WAY TO REQUIRE NODE_MODULE
 					console.log(pathToModule);
-					return mod = require(pathToModule);
+					return (mod = require(pathToModule));
 				}
 				return mod;
 			}
