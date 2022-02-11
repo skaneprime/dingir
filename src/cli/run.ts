@@ -39,13 +39,14 @@ void (async function runCluster() {
                     target: "es6",
                     noImplicitAny: false,
                 },
+				${__filename.endsWith(".ts") ? "transpileOnly: true," : ""}
                 files: true
             });`,
 			"typesript-node",
 		);
 
 		require.extensions[".dg"] = (module, filename) => {
-			module.exports = Dingir.compiler.import(filename);
+			module.exports = Dingir.Compiler.import(filename);
 			return module;
 		};
 
@@ -56,8 +57,22 @@ void (async function runCluster() {
 program
 	.command("run <source>")
 	.description("Run a DG or TS")
-	.option("-d, --debug")
-	.action(async (source: string, options: { debug?: boolean }) => {
+	.option("-d, --debug [mode]")
+	.action(async (source: string, options: { debug?: string | boolean }) => {
+		if (typeof options?.debug == "string" && options.debug.includes("saitama")) {
+			Object.defineProperty(process.env, "SAITAMAS_SUPER_SECRET_DEBUG", {
+				enumerable: false,
+				configurable: false,
+				value: true,
+				writable: false,
+			});
+			systemLogger.enableLevel(1);
+		}
+
+		if (options.debug == true || options?.debug != "satiama") {
+			systemLogger.enableLevel(1);
+		}
+
 		if (cluster.isPrimary) {
 			await server.serve();
 			const worker = cluster.fork({ source, debug: options.debug });
