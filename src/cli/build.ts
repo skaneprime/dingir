@@ -1,5 +1,5 @@
 import { program } from ".";
-import { compiler } from "../dingir";
+import { Compiler } from "../dingir";
 import { systemLogger } from "../services/logger/system";
 
 program
@@ -37,6 +37,6 @@ program
 				systemLogger.enableLevel(1);
 			}
 
-			await compiler.compile(source, { ...options, out });
+			await Compiler.compile(source, { ...options, out });
 		},
 	);

@@ -72,7 +72,6 @@
     /* Advanced Options */
     "skipLibCheck": false,                           /* Skip type checking of declaration files. */
     "forceConsistentCasingInFileNames": true,        /* Disallow inconsistently-cased references to the same file. */
-    "useUnknownInCatchVariables": true
   },
   "files": [
     "./bin/dingir.d.ts"
