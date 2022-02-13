@@ -8,6 +8,12 @@ import { systemLogger } from "../services/logger/system";
 
 /** @public */
 export function dgImport(entry: string) {
+	try {
+		entry = require.resolve(entry, { paths: [process.cwd()] });
+	} catch (error) {
+		systemLogger.error(`Can't find file:`, error);
+	}
+
 	if (!entry.endsWith(".dg")) {
 		return systemLogger.error(`"${entry}" can't import non .dg file`);
 	}
@@ -38,21 +44,24 @@ export function dgImport(entry: string) {
 		return systemLogger.fatal("Failed to require externals");
 	}
 
+	function pseudoRequire(id: string) {
+		const externalPath = require.resolve(id, {
+			paths: [process.cwd(), `${process.cwd()}/node_modules`],
+		});
+		return require(externalPath);
+	}
+
+	Object.defineProperties(pseudoRequire, {
+		extensions: { value: require.extensions },
+		resolve: { value: require.resolve },
+		cache: { value: require.cache },
+		main: { value: require.main },
+	});
+
+	const bytecode = coder.buffer.decode(unpacked.bytecode);
 	const mod = { exports: {} };
-	systemLogger.debug(1, mod);
-	bytenode.runBytecode(coder.buffer.decode(unpacked.bytecode))(
-		mod.exports,
-		(id: string) => {
-			const externalPath = require.resolve(id, {
-				paths: [process.cwd(), `${process.cwd()}/node_modules`],
-			});
-			return require(externalPath);
-		},
-		mod,
-		entry,
-		path.dirname(entry),
-	);
-	systemLogger.debug(2, mod);
+
+	bytenode.runBytecode(bytecode)(mod.exports, pseudoRequire, mod, entry, path.dirname(entry));
 	return mod.exports as Record<string, unknown>;
 }
 
