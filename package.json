@@ -8,7 +8,7 @@
   "scripts": {
     "extract-api": "npx api-extractor run --local --verbose & ts-node scripts/api-extractor-globalize.ts",
     "bundle": "npx ncc build bin/.tsc/index.js -o bin -e bytenode -e express -e typescript -e vm2 -e ts-node -e stacktracey -e @vercel/ncc -e @microsoft/api-extractor -m --target es2020 -C",
-    "build": "npm run checkup & npm run clear & tsc & npm run bundle & npm run extract-api & npm run rename & npm run post-clear & pkg -C GZip .",
+    "build": "npm run checkup & npm run clear & tsc & npm run bundle & npm run extract-api & npm run rename & npm run post-clear & npx pkg -C GZip .",
     "rename": "ts-node scripts/rename.ts",
     "post-clear": "ts-node scripts/post-clear.ts",
     "clear": "ts-node scripts/clear.ts",
