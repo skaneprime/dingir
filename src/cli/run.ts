@@ -14,7 +14,7 @@ void (async function runCluster() {
 		require.extensions[".dg"] = (module, filename) => {
 			module.exports = Dingir.Compiler.import(filename);
 			module.loaded = true;
-			console.log("REQUIRING DG", module, filename);
+			// console.log("REQUIRING DG", module, filename);
 			return module;
 		};
 
