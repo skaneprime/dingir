@@ -24,7 +24,10 @@ export function dgImport(entry: string) {
 	let requireFailed = false;
 	for (let i = 0; i < unpacked.meta.externals.length; i++) {
 		try {
-			require(`${process.cwd()}/node_modules/${unpacked.meta.externals[i]}`);
+			const externalPath = require.resolve(unpacked.meta.externals[i], {
+				paths: [process.cwd(), `${process.cwd()}/node_modules`],
+			});
+			require(externalPath);
 		} catch (error) {
 			systemLogger.fatal(error);
 			requireFailed = true;
@@ -36,33 +39,24 @@ export function dgImport(entry: string) {
 	}
 
 	const mod = { exports: {} };
-	console.log(entry);
+	systemLogger.debug(1, mod);
 	bytenode.runBytecode(coder.buffer.decode(unpacked.bytecode))(
 		mod.exports,
-		(str: string) => {
-			/** INVESTIGATE ME. TEMPORAL FIX
-			 * // DEEP DG REQUIRE RESULT IN FAIL (2 LVL)
-			 * FILE1.DG -> FILE2.DG -> CANVAS = FAILED TO REQUIRE
-			 */
-			let mod = {};
-			try {
-				return (mod = require(str));
-			} catch (error) {
-				if (error instanceof Error && error.message.includes("Cannot find module")) {
-					const nodePath = path.relative(`${path.dirname(entry)}`, str);
-					const modName = path.basename(str).replace(path.extname(str), "");
-					const pathToModule = `${process.cwd()}/node_modules/${modName}/${nodePath}`;
-					// INVALID WAY TO REQUIRE NODE_MODULE
-					console.log(pathToModule);
-					return (mod = require(pathToModule));
-				}
-				return mod;
-			}
+		(id: string) => {
+			const externalPath = require.resolve(id, {
+				paths: [process.cwd(), `${process.cwd()}/node_modules`],
+			});
+			return require(externalPath);
 		},
 		mod,
 		entry,
 		path.dirname(entry),
 	);
-
+	systemLogger.debug(2, mod);
 	return mod.exports as Record<string, unknown>;
 }
+
+/**
+ *
+ * ISSUE IN IMPORT FIX DEEP REQUIRE
+ */
