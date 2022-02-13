@@ -11,6 +11,13 @@ void (async function runCluster() {
 	if (cluster.isWorker && process.env.source) {
 		cluster.worker?.process.channel?.unref();
 
+		require.extensions[".dg"] = (module, filename) => {
+			module.exports = Dingir.Compiler.import(filename);
+			module.loaded = true;
+			console.log("REQUIRING DG", module, filename);
+			return module;
+		};
+
 		const dingirVM = new NodeVM({
 			compiler(code, filename) {
 				systemLogger.debug(
@@ -28,7 +35,11 @@ void (async function runCluster() {
 					? path.resolve(process.cwd(), "bin", "dingir.d.ts")
 					: path.resolve(process.cwd(), "dingir.d.ts"),
 			},
-			require: { builtin: ["*"], external: true },
+			require: {
+				builtin: ["*"],
+				external: true,
+				customRequire: require,
+			},
 			sourceExtensions: ["dg", "js", "ts"],
 			console: "inherit",
 		});
@@ -44,11 +55,6 @@ void (async function runCluster() {
             });`,
 			"typesript-node",
 		);
-
-		require.extensions[".dg"] = (module, filename) => {
-			module.exports = Dingir.Compiler.import(filename);
-			return module;
-		};
 
 		dingirVM.run(`require(__MAIN_FILE_PATH__)`, path.basename(process.env.source));
 	}
