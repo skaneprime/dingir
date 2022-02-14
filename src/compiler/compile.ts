@@ -9,7 +9,7 @@ import { Extractor, ExtractorConfig, ExtractorLogLevel } from "@microsoft/api-ex
 import ncc from "../helper/ncc";
 import coder from "./coder";
 import packer from "./packer";
-import { env } from "../dingir";
+import { env, Utils } from "../dingir";
 import { systemLogger } from "../services/logger/system";
 import tty from "tty";
 
@@ -52,6 +52,8 @@ export async function dgCompile(entry: string, options?: CompilerOptions) {
 			options?.ver ? `@${options.ver}` : ""
 		}.dg`,
 	);
+
+	Utils.fs.ensureDirectoryExistence(outPath);
 	fs.createWriteStream(outPath).write(packed);
 
 	// STEP 4 (OPTIONAL): BUILD DECLARATION
