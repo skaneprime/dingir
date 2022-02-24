@@ -1,5 +1,8 @@
 import path from "path";
 import chalk from "chalk";
+import { promisify } from "util";
+import { exec } from "child_process";
+
 import cluster from "cluster";
 import server from "../server";
 import { NodeVM } from "vm2";
@@ -14,7 +17,6 @@ void (async function runCluster() {
 		require.extensions[".dg"] = (module, filename) => {
 			module.exports = Dingir.Compiler.import(filename);
 			module.loaded = true;
-			// console.log("REQUIRING DG", module, filename);
 			return module;
 		};
 
@@ -64,7 +66,14 @@ program
 	.command("run <source>")
 	.description("Run a DG or TS")
 	.option("-d, --debug [mode]")
-	.action(async (source: string, options: { debug?: string | boolean }) => {
+	.option("-E, --externals [mod...]")
+	.action(async (source: string, options: { debug?: string | boolean; externals?: string[] }) => {
+		if (options.externals) {
+			for (let i = 0; i < options.externals.length; i++) {
+				await promisify(exec)(`npm i ${options.externals[i]}`);
+			}
+		}
+
 		if (typeof options?.debug == "string" && options.debug.includes("saitama")) {
 			Object.defineProperty(process.env, "SAITAMAS_SUPER_SECRET_DEBUG", {
 				enumerable: false,
