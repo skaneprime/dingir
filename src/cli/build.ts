@@ -1,6 +1,5 @@
-import { program } from ".";
+import { enableDebugIfTrue, program } from ".";
 import { Compiler } from "../dingir";
-import { systemLogger } from "../services/logger/system";
 
 program
 	.command("build <source> [destination]")
@@ -23,19 +22,7 @@ program
 				supersecretdebug?: boolean;
 			},
 		) => {
-			if (typeof options?.debug == "string" && options.debug.includes("saitama")) {
-				Object.defineProperty(process.env, "SAITAMAS_SUPER_SECRET_DEBUG", {
-					enumerable: false,
-					configurable: false,
-					value: true,
-					writable: false,
-				});
-				systemLogger.enableLevel(1);
-			}
-
-			if (options.debug == true || options.debug != "satiama") {
-				systemLogger.enableLevel(1);
-			}
+			enableDebugIfTrue(options);
 
 			await Compiler.compile(source, { ...options, out });
 		},
