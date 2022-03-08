@@ -61,7 +61,12 @@ export function dgImport(entry: string) {
 	const bytecode = coder.buffer.decode(unpacked.bytecode);
 	const mod = { exports: {} };
 
-	bytenode.runBytecode(bytecode)(mod.exports, pseudoRequire, mod, entry, path.dirname(entry));
+	try {
+		bytenode.runBytecode(bytecode)(mod.exports, pseudoRequire, mod, entry, path.dirname(entry));
+	} catch (error) {
+		systemLogger.error(`Failed to import "${entry}"`, error);
+	}
+
 	return mod.exports as Record<string, unknown>;
 }
 
