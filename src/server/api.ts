@@ -27,6 +27,10 @@ const versions = {
 		return finished(fileStream);
 	},
 
+	async getLatest() {
+		return (await axios.get(`${SERVER_ADDRESS}/versions/latest/version`)).data;
+	},
+
 	async downloadLatest() {
 		// file
 		const finished = promisify(stream.finished);
