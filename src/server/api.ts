@@ -20,6 +20,7 @@ const versions = {
 			url: `${SERVER_ADDRESS}/versions/${version}`,
 			responseType: "stream",
 		});
+		
 		const fileStream = createWriteStream(`${path.dirname(process.execPath)}/${version}.zip`);
 
 		file.data.pipe(fileStream);
