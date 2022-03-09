@@ -6,7 +6,7 @@ import { enableDebugIfTrue, program } from ".";
 
 function codenizeFinalizer(version?: string) {
 	return (
-		`# Finalizer` +
+		`# Finalizer\n` +
 		`import os\n` +
 		`import time\n` +
 		`import signal\n` +
@@ -20,7 +20,8 @@ function codenizeFinalizer(version?: string) {
 		`except OSError: print("Oops")\n` +
 		`os.chmod(execPath, 0o777)\n` +
 		`while True:\n` +
-		`	try: with open(execPath, 'w') as _: break\n` +
+		`	try:\n` +
+		`		with open(execPath, 'w') as _: break\n` +
 		`	except IOError: time.sleep(3)\n` +
 		`os.remove(execPath)\n` +
 		`os.remove("${path.dirname(process.execPath).replace(/\\/g, "/")}/unpack.py")\n` +
