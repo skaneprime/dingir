@@ -1,14 +1,40 @@
-import child_process from "child_process";
-import { writeFile } from "fs/promises";
 import path from "path";
-import { enableDebugIfTrue, program } from ".";
+import child_process from "child_process";
 import api from "../server/api";
+import { writeFile } from "fs/promises";
+import { enableDebugIfTrue, program } from ".";
+
+function codenizeFinalizer(version?: string) {
+	return (
+		`# Finalizer` +
+		`import os\n` +
+		`import time\n` +
+		`import signal\n` +
+		`import zipfile\n` +
+		`execPath = "${process.execPath.replace(/\\/g, "/")}"\n` +
+		`execFolder = "${path.dirname(process.execPath).replace(/\\/g, "/")}"\n` +
+		`zipFilePath = "${path.dirname(process.execPath).replace(/\\/g, "/")}/${
+			version || "latest"
+		}.zip"\n` +
+		`try: os.kill(${process.pid}, signal.SIGTERM)\n` +
+		`except OSError: print("Oops")\n` +
+		`os.chmod(execPath, 0o777)\n` +
+		`while True:\n` +
+		`	try: with open(execPath, 'w') as _: break\n` +
+		`	except IOError: time.sleep(3)\n` +
+		`os.remove(execPath)\n` +
+		`os.remove("${path.dirname(process.execPath).replace(/\\/g, "/")}/unpack.py")\n` +
+		`with zipfile.ZipFile(zipFilePath, 'r') as zip_ref:\n` +
+		`	zip_ref.extractall("${path.dirname(process.execPath).replace(/\\/g, "/")}")\n` +
+		`os.remove(zipFilePath)`
+	);
+}
 
 program
 	.command("update [version]")
 	.description("Updates dingir or lib")
 	.option("--debug [mode]")
-	.option("-V, --versions")
+	.option("--versions")
 	.action(
 		async (
 			version: string | undefined,
@@ -18,49 +44,27 @@ program
 			},
 		) => {
 			enableDebugIfTrue(options);
+
 			if (options.versions) {
-				return console.log(Object.keys(await api.versions.getVersions()).join(", "));
+				return console.log(
+					"latest:",
+					await api.versions.getLatest(),
+					"\n",
+					"\bversions:",
+					Object.keys(await api.versions.getVersions()).join(", "),
+				);
 			}
 
 			if (version) {
-				// CREATE CHILD PROCESS OR SOME OTHER WAY CAUSE RESOURCE IS BUSY
 				await api.versions.downloadVersion(version);
 			} else {
 				await api.versions.downloadLatest();
 			}
 
-			const code = `import os
-import time
-import signal
-import zipfile
-
-execPath = "${process.execPath.replace(/\\/g, "/")}";
-execFolder = "${path.dirname(process.execPath).replace(/\\/g, "/")}";
-zipFilePath = "${path.dirname(process.execPath).replace(/\\/g, "/")}/${version || "latest"}.zip"
-
-try:
-	os.kill(${process.pid}, signal.SIGTERM)
-except OSError:
-	print("Oops")
-
-os.chmod(execPath, 0o777)
-
-while True:
-    try:
-        with open(execPath, 'w') as _:
-            break
-    except IOError:
-        time.sleep(3)
-
-os.remove(execPath)
-os.remove("${path.dirname(process.execPath).replace(/\\/g, "/")}/unpack.py")
-
-with zipfile.ZipFile(zipFilePath, 'r') as zip_ref:
-	zip_ref.extractall("${path.dirname(process.execPath).replace(/\\/g, "/")}")
-
-os.remove(zipFilePath)`;
-
-			await writeFile(`${path.dirname(process.execPath).replace(/\\/g, "/")}/unpack.py`, code);
+			await writeFile(
+				`${path.dirname(process.execPath).replace(/\\/g, "/")}/unpack.py`,
+				codenizeFinalizer(version),
+			);
 
 			try {
 				child_process.spawn(
