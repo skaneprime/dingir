@@ -14,8 +14,8 @@ void async function () {
 
     const request = http.request({
         method: 'post',
-        host: "127.0.0.1",
-        port: 3000,
+        host: "api.dingir.xyz",
+        port: 25560,
         path: `/versions/${version}`,
         headers: form.getHeaders()
     })
@@ -29,4 +29,4 @@ void async function () {
         res.on('data', (chunk) => jsonStr += chunk);
         res.on('end', () => console.log(JSON.parse(jsonStr)));
     });
-}()
+}();
