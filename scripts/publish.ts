@@ -1,7 +1,8 @@
-import http from 'http';
+import axios from 'axios';
 import FormData from 'form-data';
 import { createReadStream } from 'fs';
 import { version } from '../src/env';
+import { SERVER_ADDRESS } from "../src/server/constants";
 
 void async function () {
     const form = new FormData();
@@ -12,21 +13,14 @@ void async function () {
     form.append("win", createReadStream(`${process.cwd()}/bin/dingir-win.exe`));
     form.append("readme", createReadStream(`${process.cwd()}/bin/dingir.api.md`));
 
-    const request = http.request({
+    const result = await axios({
         method: 'post',
-        host: "api.dingir.xyz",
-        port: 25560,
-        path: `/versions/${version}`,
+        url: `${SERVER_ADDRESS}/versions/${version}`,
+        data: form,
+        maxContentLength: Infinity,
+        maxBodyLength: Infinity,
         headers: form.getHeaders()
     })
-
-    form.pipe(request);
     
-    request.on('response', function(res) {
-        let jsonStr = "";
-        console.log(res.statusCode);
-        
-        res.on('data', (chunk) => jsonStr += chunk);
-        res.on('end', () => console.log(JSON.parse(jsonStr)));
-    });
+    console.log(result.data);
 }();
