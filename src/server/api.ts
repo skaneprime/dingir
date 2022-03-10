@@ -20,7 +20,7 @@ const versions = {
 			url: `${SERVER_ADDRESS}/versions/${version}`,
 			responseType: "stream",
 		});
-		
+
 		const fileStream = createWriteStream(`${path.dirname(process.execPath)}/${version}.zip`);
 
 		file.data.pipe(fileStream);
@@ -59,8 +59,9 @@ const libs = {
 	},
 
 	async getLib(name: string, version?: string) {
-		const url = `${SERVER_ADDRESS}/libs/${name}${version ? `/${version}` : ""}`;
-		let lib = (await axios.get(url)).data;
+		const [v1, v2, v3] = (version || "").split(".");
+		const url = `${SERVER_ADDRESS}/libs/${name}`;
+		let lib = (await axios.get(`${url}${version ? `/${v1}.${v2 || "*"}.${v3 || "*"}` : ""}`)).data;
 
 		if (!version) {
 			lib = {
@@ -69,8 +70,8 @@ const libs = {
 			};
 		}
 
-		const file = (await axios.get(`${url}/download`)).data;
-		const decl = (await axios.get(`${url}/declaration`)).data;
+		const file = (await axios.get(`${url}/${lib.version}/download`)).data;
+		const decl = (await axios.get(`${url}/${lib.version}/declaration`)).data;
 
 		return { ...lib, file: Buffer.from(file.data), decl: Buffer.from(decl.data) };
 	},
