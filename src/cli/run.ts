@@ -11,7 +11,7 @@ import { systemLogger } from "../services/logger/system";
 
 void (async function runCluster() {
 	if (cluster.isWorker && process.env.source) {
-		if(process.env.IS_SERVER != "true") {
+		if (process.env.IS_SERVER != "true") {
 			cluster.worker?.process.channel?.unref();
 		}
 
@@ -93,10 +93,10 @@ program
 				const logLabel = Dingir.Performance.setLabel(
 					`${chalk.cyan(`[Cluster: ${chalk.green(`"${source}"`)}]`)} execution time took`,
 				);
-				const worker = cluster.fork({ 
-					source: source, 
+				const worker = cluster.fork({
+					source: source,
 					debug: options.debug,
-					IS_SERVER: `${options.server}`
+					IS_SERVER: `${options.server}`,
 				});
 
 				worker.on("exit", async (code) => {

@@ -94,7 +94,7 @@ export class LoggerService {
 		},
 	) {
 		this.stdout = options?.stdout || this.stdout;
-		
+
 		const streamFilePath = options?.logFilePath
 			? path.resolve(options.logFilePath)
 			: path.resolve(process.cwd(), "logs", moment().format("YYYY-MM-DD") + ".log");
