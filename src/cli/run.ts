@@ -11,7 +11,9 @@ import { systemLogger } from "../services/logger/system";
 
 void (async function runCluster() {
 	if (cluster.isWorker && process.env.source) {
-		cluster.worker?.process.channel?.unref();
+		if(process.env.IS_SERVER != "true") {
+			cluster.worker?.process.channel?.unref();
+		}
 
 		if (process.env.debug) {
 			systemLogger.enableLevel(Dingir.Logger.LogLevel.DEBUG);
@@ -67,12 +69,14 @@ program
 	.description("Run a DG or TS")
 	.option("-d, --debug [mode]")
 	.option("-P, --performance")
+	.option("-S, --server")
 	.option("-E, --externals [mod...]")
 	.action(
 		async (
 			source: string,
 			options: {
 				debug?: string | boolean;
+				server?: boolean;
 				performance?: boolean;
 				externals?: string[];
 			},
@@ -89,7 +93,11 @@ program
 				const logLabel = Dingir.Performance.setLabel(
 					`${chalk.cyan(`[Cluster: ${chalk.green(`"${source}"`)}]`)} execution time took`,
 				);
-				const worker = cluster.fork({ source, debug: options.debug });
+				const worker = cluster.fork({ 
+					source: source, 
+					debug: options.debug,
+					IS_SERVER: `${options.server}`
+				});
 
 				worker.on("exit", async (code) => {
 					if (logLabel) {
