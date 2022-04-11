@@ -37,6 +37,7 @@ function printPrettyError(error: Error) {
 				})
 				.join("\n"),
 		);
+		process.exit(1);
 	}
 }
 
