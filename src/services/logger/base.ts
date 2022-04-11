@@ -94,12 +94,12 @@ export class LoggerService {
 		},
 	) {
 		this.stdout = options?.stdout || this.stdout;
-
+		
 		const streamFilePath = options?.logFilePath
 			? path.resolve(options.logFilePath)
 			: path.resolve(process.cwd(), "logs", moment().format("YYYY-MM-DD") + ".log");
 
-		if(options?.logFilePath || options?.logs) {
+		if (options?.logFilePath || options?.logs) {
 			Utils.fs.ensureDirectoryExistence(streamFilePath);
 			this.file = fs.createWriteStream(streamFilePath, { flags: "a" });
 		}
