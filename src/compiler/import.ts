@@ -6,6 +6,13 @@ import packer from "./packer";
 import { env } from "../dingir";
 import { systemLogger } from "../services/logger/system";
 
+function pseudoRequire(id: string) {
+	const externalPath = require.resolve(id, {
+		paths: [process.cwd(), `${process.cwd()}/node_modules`],
+	});
+	return require(externalPath);
+}
+
 /** @public */
 export function dgImport(entry: string) {
 	try {
@@ -30,25 +37,22 @@ export function dgImport(entry: string) {
 	let requireFailed = false;
 	for (let i = 0; i < unpacked.meta.externals.length; i++) {
 		try {
-			const externalPath = require.resolve(unpacked.meta.externals[i], {
-				paths: [process.cwd(), `${process.cwd()}/node_modules`],
-			});
-			require(externalPath);
+			pseudoRequire(unpacked.meta.externals[i]);
 		} catch (error) {
-			systemLogger.fatal(error);
-			requireFailed = true;
+			if (error instanceof Error && error.message.includes("Cannot find module")) {
+				systemLogger.error(`${error.message}`);
+			} else {
+				systemLogger.fatal(error);
+				requireFailed = true;
+			}
 		}
 	}
 
 	if (requireFailed) {
-		return systemLogger.fatal("Failed to require externals");
-	}
-
-	function pseudoRequire(id: string) {
-		const externalPath = require.resolve(id, {
-			paths: [process.cwd(), `${process.cwd()}/node_modules`],
-		});
-		return require(externalPath);
+		systemLogger.fatal(
+			"Failed to require externals. See logs above.", // Use -ADI for automated dependency install on importing .dg
+		);
+		process.exit(1);
 	}
 
 	Object.defineProperties(pseudoRequire, {
@@ -69,8 +73,3 @@ export function dgImport(entry: string) {
 
 	return mod.exports as Record<string, unknown>;
 }
-
-/**
- *
- * ISSUE IN IMPORT FIX DEEP REQUIRE
- */
