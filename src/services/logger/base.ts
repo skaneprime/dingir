@@ -3,6 +3,7 @@ import path from "path";
 import util from "util";
 import chalk from "chalk";
 import moment from "moment";
+import { performance } from "perf_hooks";
 import { Utils } from "../../dingir";
 
 /** @public */
@@ -17,6 +18,9 @@ export enum LogLevel {
 
 // const sep = " │ ";
 const boldSep = " ┃ ";
+
+/** @public */
+export const seperator = boldSep;
 
 /** @public */
 export class LoggerService {
@@ -42,6 +46,7 @@ export class LoggerService {
 		LogLevel.ERROR,
 		LogLevel.FATAL,
 	]);
+	private timeLabels = new Map<string, number>();
 
 	private get time() {
 		return chalk.bold.hex(this.theme.time.color)(moment().format(this.theme.time.format));
@@ -54,7 +59,7 @@ export class LoggerService {
 	}
 
 	private seperate(...args: unknown[]) {
-		return args.join(boldSep);
+		return args.join(seperator);
 	}
 
 	private write(level: LogLevel, args: unknown[]) {
@@ -83,6 +88,7 @@ export class LoggerService {
 	constructor(
 		private options?: {
 			stdout?: NodeJS.WriteStream & { fd: 1 };
+			logs?: boolean;
 			logFilePath?: string;
 			label?: string;
 		},
@@ -93,8 +99,10 @@ export class LoggerService {
 			? path.resolve(options.logFilePath)
 			: path.resolve(process.cwd(), "logs", moment().format("YYYY-MM-DD") + ".log");
 
-		Utils.fs.ensureDirectoryExistence(streamFilePath);
-		this.file = fs.createWriteStream(streamFilePath, { flags: "a" });
+		if(options?.logFilePath || options?.logs) {
+			Utils.fs.ensureDirectoryExistence(streamFilePath);
+			this.file = fs.createWriteStream(streamFilePath, { flags: "a" });
+		}
 	}
 
 	public enableLevel(level: LogLevel) {
@@ -106,10 +114,40 @@ export class LoggerService {
 		return this;
 	}
 
-	public trace = (...args: unknown[]) => this.write(LogLevel.TRACE, args);
-	public debug = (...args: unknown[]) => this.write(LogLevel.DEBUG, args);
-	public info = (...args: unknown[]) => this.write(LogLevel.INFO, args);
-	public warn = (...args: unknown[]) => this.write(LogLevel.WARN, args);
-	public error = (...args: unknown[]) => this.write(LogLevel.ERROR, args);
-	public fatal = (...args: unknown[]) => this.write(LogLevel.FATAL, args);
+	private wrap = (level: LogLevel) => {
+		return Object.assign((...args: unknown[]) => this.write(level, args), {
+			time: (label?: string) => {
+				if (label) {
+					this.timeLabels.set(label, performance.now());
+					return;
+				}
+
+				const now = performance.now();
+
+				return (...args: unknown[]) => {
+					this.write(level, [...args, `${performance.now() - now}ms`]);
+				};
+			},
+			timeEnd: (label: string, ...args: unknown[]) => {
+				const time = this.timeLabels.get(label);
+
+				if (time != undefined) {
+					this.write(level, [...args, `${performance.now() - time}ms`]);
+				}
+			},
+			timeFunc: <T extends (...args: unknown[]) => void>(callback: T) => {
+				return callback;
+			},
+		});
+	};
+
+	public trace = this.wrap(LogLevel.TRACE);
+	public debug = this.wrap(LogLevel.DEBUG);
+	public info = this.wrap(LogLevel.INFO);
+	public warn = this.wrap(LogLevel.WARN);
+	public error = this.wrap(LogLevel.ERROR);
+	public fatal = this.wrap(LogLevel.FATAL);
 }
+
+// Log With Time
+// MAKE PERFORMANCE MANAGER FOR FUNCTION AND LABELED CODE SPACES
