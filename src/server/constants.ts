@@ -1,1 +1,1 @@
-export const SERVER_ADDRESS = "http://api.dingir.xyz:25560";
+export const SERVER_ADDRESS = "http://94.198.51.1:10000";
