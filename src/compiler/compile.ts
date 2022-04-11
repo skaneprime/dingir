@@ -13,7 +13,7 @@ import { env, Utils } from "../dingir";
 import { systemLogger } from "../services/logger/system";
 import tty from "tty";
 
-interface CompilerOptions {
+export interface CompilerOptions {
 	out?: string;
 	ver?: string;
 	minify?: boolean;
@@ -69,6 +69,7 @@ export async function dgCompile(entry: string, options?: CompilerOptions) {
 function compileTypescript(entry: string) {
 	const buildDir = `${process.cwd()}/.build-${crypto.randomBytes(10).toString("hex")}`;
 	const oldConsole = console;
+
 	if (!process.env["SAITAMAS_SUPER_SECRET_DEBUG"]) {
 		console = new console.Console(new tty.WriteStream(0));
 	}
@@ -80,6 +81,8 @@ function compileTypescript(entry: string) {
 			declaration: true,
 			outDir: buildDir,
 			declarationDir: buildDir,
+			diagnostics: !!process.env["SAITAMAS_SUPER_SECRET_DEBUG"],
+			noImplicitAny: false,
 		},
 		include: [
 			path.resolve(process.cwd(), "dingir.d.ts"),
