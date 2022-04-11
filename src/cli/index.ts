@@ -1,9 +1,12 @@
 import { Command } from "commander";
-import { env } from "../dingir";
+import { Dingir } from "..";
 import { systemLogger } from "../services/logger/system";
 
-export const program = new Command("dingir").version(env.version);
-export const enableDebugIfTrue = (options?: { debug?: string | boolean }) => {
+export const program = new Command("dingir").version(Dingir.env.version);
+export const enableDebugIfTrue = (options?: {
+	debug?: string | boolean;
+	performance?: boolean;
+}) => {
 	if (typeof options?.debug == "string" && options.debug.includes("saitama")) {
 		Object.defineProperty(process.env, "SAITAMAS_SUPER_SECRET_DEBUG", {
 			enumerable: false,
@@ -14,8 +17,12 @@ export const enableDebugIfTrue = (options?: { debug?: string | boolean }) => {
 		systemLogger.enableLevel(1);
 	}
 
-	if (options?.debug == true || options?.debug != "satiama") {
+	if (options?.debug == true) {
 		systemLogger.enableLevel(1);
+	}
+
+	if (options?.performance == true) {
+		Dingir.Performance.enableLog();
 	}
 };
 

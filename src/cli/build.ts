@@ -7,6 +7,7 @@ program
 	.option("-d, --declaration")
 	.option("-v, --ver <version>")
 	.option("--debug [mode]")
+	.option("-P, --performance")
 	.option("-m, --minify")
 	.option("-e, --externals [mod...]")
 	.action(
